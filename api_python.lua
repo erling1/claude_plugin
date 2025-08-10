@@ -1,7 +1,23 @@
 local M = {}
 
 function M.send_with_python(input, callback)
-  local cmd = { "python3", vim.fn.stdpath("config") .. "/lua/claude_plugin/chat_request.py" }
+  --local current_file = vim.api.nvim_buf_get_name(0)
+  --local current_dir = vim.fn.fnamemodify(current_file, ":h")
+  --
+
+  local chat_win_module = require("claude_plugin.chat_window")
+  local current_file = chat_win_module.current_file or ""
+  local current_dir = chat_win_module.current_dir or "."
+
+  print("Current file: " .. current_file)
+  print("Current dir: " .. current_dir)
+
+  local cmd = {
+    "python3",
+    vim.fn.stdpath("config") .. "/lua/claude_plugin/chat_request.py",
+    current_dir,
+    current_file,
+  }
 
   local output = {}
   local handle = vim.fn.jobstart(cmd, {

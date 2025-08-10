@@ -10,6 +10,14 @@ local chat_history = {}
 
 function M.open(model)
   -- Create chat buffer and window (history)
+  local current_file = vim.api.nvim_buf_get_name(0)
+  local current_dir = vim.fn.fnamemodify(current_file, ":h")
+  M.current_file = current_file
+  M.current_dir = current_dir
+
+  print("Current file before chat window: " .. current_file)
+  print("Current dir before chat window: " .. current_dir)
+
   chat_buf = vim.api.nvim_create_buf(false, true)
   local width = 60
   local height = 15
@@ -90,13 +98,21 @@ function M.submit()
       if err then
         table.insert(chat_history, "❌ Error: " .. err)
       else
-        table.insert(chat_history, "🤖 " .. response)
+        -- Split response into separate lines
+        local lines = vim.split(response, "\n", { plain = true })
+        if #lines > 0 then
+          -- Add 🤖 to first line only
+          lines[1] = "🤖 " .. lines[1]
+          for _, line in ipairs(lines) do
+            table.insert(chat_history, line)
+          end
+        end
       end
 
-      -- Update chat window with new messages
+      -- Update chat window
       M.update_chat()
-    end)
-  end
-end
+    end) -- closes the callback function
+  end -- closes the if block
+end -- closes M.submit()
 
 return M
